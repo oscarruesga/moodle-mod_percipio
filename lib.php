@@ -393,12 +393,15 @@ function percipio_get_course_image() {
 }
 
 /**
- * Function to generate the Tin Can launch URL
+ * Function to generate the launch URL
  *
- * @param string $activityurl the Tin Can launch URL of this activity to be appended.
+ * @param string $activityurl the Tin Can launch or share link URL of this activity to be appended.
  * @return the launch url.
  */
-function percipio_get_launchurl($activityurl) {
+function percipio_get_launchurl($activityurl, $urlType) {
+    if (strpos($activityurl, '/cd/') !== false || $urlType == 'sharelink') {
+        return $activityurl;
+    }
     global $USER, $CFG;
     $oauthtoken = '';
     $contenttoken = '';

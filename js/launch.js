@@ -1,8 +1,9 @@
-function callajax(Y,launchurl,sesskey) {
+/* eslint-disable */
+function callajax(Y,launchurl,sesskey,urltype) {
 	$('.launch_course').on("click", function(e){
 		e.preventDefault();
 		$('.loader_background').show();
-		$.ajax({type: "POST", url: "getlaunchurl.php",  data: { "url":launchurl, "sesskey":sesskey }}).done(function( result ) {
+		$.ajax({type: "POST", url: "getlaunchurl.php",  data: { "url":launchurl, "sesskey":sesskey, "urlType": urltype }}).done(function( result ) {
 			$('.loader_background').hide();
 			if(result != '') {
 				window.open(result);

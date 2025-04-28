@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $PAGE->requires->js('/mod/percipio/js/launch.js');
-$PAGE->requires->js_init_call('callajax', [$moduleinstance->launchurl, sesskey()]);
+$PAGE->requires->js_init_call('callajax', [$moduleinstance->launchurl, sesskey(), $moduleinstance->urltype]);
 
 $authenticationmethod = get_config('percipio', 'authenticationmethod');
 $bearertoken = get_config('percipio', 'bearertoken');
@@ -95,7 +95,7 @@ if ($moduleinstance->btntxt != '') {
     $buttontxt = get_string('launch', 'mod_percipio');
 }
 
-if ($moduleinstance->urltype == 'tincan') {
+if ($moduleinstance->urltype == 'tincan' || $moduleinstance->urltype == 'sharelink') {
     if ($authenticationmethod == '' || ($authenticationmethod == "service_account_bearer_token" &&
         ($bearertoken == '' || $orgid == '' || $redirecturl == ''))) {
         if (has_capability('mod/percipio:manage', $modulecontext)) {

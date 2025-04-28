@@ -224,11 +224,11 @@ class mod_percipio_api_external extends external_api {
                 $mformclassname = 'mod_percipio_mod_form';
                 $fromform = [
                     "name" => $course['fullname'],
-                    "launchurl" => $course["xapiActivityId"],
+                    // Based on the config variable either share link or xapiActivityId should be stored in database as launch url.
+                    "launchurl" => $course["isTincanLaunch"] ? $course["xapiActivityId"] : $course["link"],
                     "introeditor" => ["itemid" => -1, "text" => $course["summary"], "format" => 1],
                     "showdescription" => 0,
-                    "urltype" => "tincan", // Harcoded as of now, later.
-                    // It can be 'link' or 'tincan' depending upon feature enhancement from Percipio.
+                    "urltype" =>  $course["isTincanLaunch"] ? "tincan" : "sharelink",
                     "additionalinfo" => json_encode($course["additionalMetadata"]),
                     "percipiotype" => $course['percipiotype'],
                     "displaylabel" => $course['displaylabel'],
@@ -481,7 +481,24 @@ class mod_percipio_api_external extends external_api {
             throw new moodle_exception('error', 'webservice', '', get_string('nocourse', 'mod_percipio'));
         }
 
-        $getuser = $DB->get_record('user', array('id' => $trackingdata['username']));
+        // Checks if userLookupMethod exists in the $trackingdata array
+        if (isset($trackingdata['userLookupMethod'])) {
+            switch ($trackingdata['userLookupMethod']) {
+                case 'username':
+                    $getuser = $DB->get_record('user', array('username' => $trackingdata['username']));
+                    break;
+                case 'email':
+                    $getuser = $DB->get_record('user', array('email' => $trackingdata['username']));
+                    break;
+                default:
+                    // Default fallback to original behavior
+                    $getuser = $DB->get_record('user', array('id' => $trackingdata['username']));
+            }
+        } else {
+            // If userLookupMethod is not set, use the original behavior
+            $getuser = $DB->get_record('user', array('id' => $trackingdata['username']));
+        }
+
         if (!$getuser) {
             throw new moodle_exception('error', 'webservice', '', get_string('nouser', 'mod_percipio'));
         }
@@ -526,7 +543,6 @@ class mod_percipio_api_external extends external_api {
                 $attemprecord->cmid = $getcourse->cmid;
                 $attemprecord->userid = $getuser->id;
                 $attemprecord->grade = $trackingdata['finalgrade'];
-                $attemprecord->grade = $trackingdata['finalgrade'];
                 $attemprecord->completionmessage = $trackingdata['completionmessage'];
                 $attemprecord->passingscore = $trackingdata['passingscore'];
                 $attemprecord->lastscore = $trackingdata['lastscore'];
@@ -544,7 +560,6 @@ class mod_percipio_api_external extends external_api {
             } else {
                 $attemprecord = new stdClass();
                 $attemprecord->id = $getpercipioattempt->id;
-                $attemprecord->grade = $trackingdata['finalgrade'];
                 $attemprecord->grade = $trackingdata['finalgrade'];
                 $attemprecord->completionmessage = $trackingdata['completionmessage'];
                 $attemprecord->passingscore = $trackingdata['passingscore'];

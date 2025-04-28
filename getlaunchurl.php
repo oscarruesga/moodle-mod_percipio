@@ -26,6 +26,5 @@ require_once('lib.php');
 require_login();
 require_sesskey();
 $url = required_param('url', PARAM_URL);
-if (strpos($url, 'percipio.com') !== false) {
-    echo percipio_get_launchurl($url);
-}
+$urlType = required_param('urlType', PARAM_TEXT);
+echo percipio_get_launchurl($url, $urlType);
